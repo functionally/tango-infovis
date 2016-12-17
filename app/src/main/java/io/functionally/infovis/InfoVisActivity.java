@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.projecttango.examples.java.modelcorrespondence;
+package io.functionally.infovis;
 
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.Tango.OnTangoUpdateListener;
@@ -55,6 +55,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.projecttango.tangosupport.TangoPointCloudManager;
 import com.projecttango.tangosupport.TangoSupport;
 
+import io.functionally.modelcorrespondence.R;
+
 /**
  * An example showing how to build a very simple application that allows the user to make a
  * correspondence between a model and world coordinates. It will allow to place a given model in
@@ -72,8 +74,8 @@ import com.projecttango.tangosupport.TangoSupport;
  * For more details on the augmented reality effects, including color camera texture rendering,
  * see java_augmented_reality_example or java_hello_video_example.
  */
-public class ModelCorrespondenceActivity extends Activity {
-    private static final String TAG = ModelCorrespondenceActivity.class.getSimpleName();
+public class InfoVisActivity extends Activity {
+    private static final String TAG = InfoVisActivity.class.getSimpleName();
     private static final int INVALID_TEXTURE_ID = 0;
     // For all current Tango devices, color camera is in the camera id 0.
     private static final int COLOR_CAMERA_ID = 0;
@@ -82,7 +84,7 @@ public class ModelCorrespondenceActivity extends Activity {
     private Button mUndoButton;
     private Button mResetButton;
     private SurfaceView mSurfaceView;
-    private ModelCorrespondenceRenderer mRenderer;
+    private InfoVisRenderer mRenderer;
     private TangoCameraIntrinsics mIntrinsics;
     private TangoPointCloudManager mPointCloudManager;
     private Tango mTango;
@@ -93,7 +95,7 @@ public class ModelCorrespondenceActivity extends Activity {
     // The destination points to make the correspondence.
     private List<float[]> mDestPointList;
     // The given data model.
-    private HouseModel mHouseModel;
+    private InfoVisModel mInfoVisModel;
     // Transform of the house in OpenGl frame.
     private float[] mOpenGlTHouse;
     // A flag indicating whether the model was updated and must be re rendered in the next loop.
@@ -123,7 +125,7 @@ public class ModelCorrespondenceActivity extends Activity {
         mUndoButton = (Button) findViewById(R.id.undo_button);
         mResetButton = (Button) findViewById(R.id.reset_button);
         mSurfaceView = (SurfaceView) findViewById(R.id.ar_view);
-        mRenderer = new ModelCorrespondenceRenderer(this);
+        mRenderer = new InfoVisRenderer(this);
         mSurfaceView.setSurfaceRenderer(mRenderer);
         // Set ZOrderOnTop to false so the other views don't get hidden by the SurfaceView.
         mSurfaceView.setZOrderOnTop(false);
@@ -162,7 +164,7 @@ public class ModelCorrespondenceActivity extends Activity {
         // Initialize Tango Service as a normal Android Service, since we call mTango.disconnect()
         // in onPause, this will unbind Tango Service, so every time when onResume gets called, we
         // should create a new Tango object.
-        mTango = new Tango(ModelCorrespondenceActivity.this, new Runnable() {
+        mTango = new Tango(InfoVisActivity.this, new Runnable() {
             // Pass in a Runnable to be called from UI thread when Tango is ready, this Runnable
             // will be running on a new thread.
             // When Tango is ready, we can call Tango functions safely here only when there is no UI
@@ -171,7 +173,7 @@ public class ModelCorrespondenceActivity extends Activity {
             public void run() {
                 // Synchronize against disconnecting while the service is being used in the OpenGL
                 // thread or in the UI thread.
-                synchronized (ModelCorrespondenceActivity.this) {
+                synchronized (InfoVisActivity.this) {
                     try {
                         TangoSupport.initialize();
                         mConfig = setupTangoConfig(mTango);
@@ -295,7 +297,7 @@ public class ModelCorrespondenceActivity extends Activity {
                 // Prevent concurrent access to {@code mIsFrameAvailableTangoThread} from the Tango
                 // callback thread and service disconnection from an onPause event.
                 try {
-                    synchronized (ModelCorrespondenceActivity.this) {
+                    synchronized (InfoVisActivity.this) {
                         // Don't execute any tango API actions if we're not connected to the service
                         if (!mIsConnected) {
                             return;
@@ -374,7 +376,7 @@ public class ModelCorrespondenceActivity extends Activity {
 
                         // If the model was updated then it must be re rendered.
                         if (mModelUpdated) {
-                            mRenderer.updateModelRendering(mHouseModel, mOpenGlTHouse,
+                            mRenderer.updateModelRendering(mInfoVisModel, mOpenGlTHouse,
                                     mDestPointList);
                             mModelUpdated = false;
                         }
@@ -491,7 +493,7 @@ public class ModelCorrespondenceActivity extends Activity {
                     Log.w(TAG, "Could not measure point");
                 }
                 // If it's the last point, then find the correspondence.
-                if (mDestPointList.size() == mHouseModel.getNumberOfPoints()) {
+                if (mDestPointList.size() == mInfoVisModel.getNumberOfPoints()) {
                     findCorrespondence();
                     mAddButton.setVisibility(View.GONE);
                     mUndoButton.setVisibility(View.GONE);
@@ -530,7 +532,7 @@ public class ModelCorrespondenceActivity extends Activity {
         if (mZRotationAnimator != null) {
             mZRotationAnimator.cancel();
         }
-        mHouseModel = new HouseModel();
+        mInfoVisModel = new InfoVisModel();
         mOpenGlTHouse = new float[16];
         mDestPointList = new ArrayList<float[]>();
         mCorrespondenceDone = false;
@@ -596,9 +598,9 @@ public class ModelCorrespondenceActivity extends Activity {
      */
     public void findCorrespondence() {
         // Get the correspondence source 3D points.
-        List<float[]> srcVectors = mHouseModel.getOpenGlModelPpoints(mOpenGlTHouse);
+        List<float[]> srcVectors = mInfoVisModel.getOpenGlModelPpoints(mOpenGlTHouse);
         double[][] src = new double[4][3];
-        for (int i = 0; i < mHouseModel.getNumberOfPoints(); i++) {
+        for (int i = 0; i < mInfoVisModel.getNumberOfPoints(); i++) {
             float[] v = srcVectors.get(i);
             src[i][0] = v[0];
             src[i][1] = v[1];
@@ -606,7 +608,7 @@ public class ModelCorrespondenceActivity extends Activity {
         }
         // Get the correspondence destination 3D points.
         double[][] dest = new double[4][3];
-        for (int i = 0; i < mHouseModel.getNumberOfPoints(); i++) {
+        for (int i = 0; i < mInfoVisModel.getNumberOfPoints(); i++) {
             float[] v = mDestPointList.get(i);
             dest[i][0] = v[0];
             dest[i][1] = v[1];

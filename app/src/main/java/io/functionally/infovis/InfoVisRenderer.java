@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.projecttango.examples.java.modelcorrespondence;
+package io.functionally.infovis;
 
 import com.google.atap.tangoservice.TangoPoseData;
 
@@ -44,15 +44,17 @@ import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import io.functionally.modelcorrespondence.R;
+
 /**
  * Simple example augmented reality renderer which displays spheres fixed in place for every
  * point measurement and a 3D model of a house in the position given by the found correspondence.
  * Whenever the user clicks on '+' button, a sphere is placed in the aimed position with the
  * crosshair.
  */
-public class ModelCorrespondenceRenderer extends Renderer {
+public class InfoVisRenderer extends Renderer {
     private static final float SPHERE_RADIUS = 0.02f;
-    private static final String TAG = ModelCorrespondenceRenderer.class.getSimpleName();
+    private static final String TAG = InfoVisRenderer.class.getSimpleName();
 
     private float[] textureCoords0 = new float[]{0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F};
     private float[] textureCoords270 = new float[]{1.0F, 1.0F, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F};
@@ -71,7 +73,7 @@ public class ModelCorrespondenceRenderer extends Renderer {
 
     private ScreenQuad mBackgroundQuad;
 
-    public ModelCorrespondenceRenderer(Context context) {
+    public InfoVisRenderer(Context context) {
         super(context);
     }
 
@@ -200,7 +202,7 @@ public class ModelCorrespondenceRenderer extends Renderer {
      * correspondence destination points as red spheres. Render the 3d model in the position and
      * orientation given by the found correspondence transform.
      */
-    public void updateModelRendering(HouseModel houseModel, float[] openGlTHouse,
+    public void updateModelRendering(InfoVisModel infoVisModel, float[] openGlTHouse,
                                      List<float[]> destPoints) {
         if (destPoints.size() > mDestPointsObjectList.size()) {
             // If new destination points were measured, then add them as points as red spheres.
@@ -220,7 +222,7 @@ public class ModelCorrespondenceRenderer extends Renderer {
 
         // Move the position of the next source point to be added.
         int nextPointNumber = destPoints.size();
-        List<float[]> houseModelPoints = houseModel.getOpenGlModelPpoints(openGlTHouse);
+        List<float[]> houseModelPoints = infoVisModel.getOpenGlModelPpoints(openGlTHouse);
         if (nextPointNumber < houseModelPoints.size()) {
             if (mNextPointObject3D == null) {
                 mNextPointObject3D = makePoint(new float[]{0, 0, 0}, Color.GREEN);

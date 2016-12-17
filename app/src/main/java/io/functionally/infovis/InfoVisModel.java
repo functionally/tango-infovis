@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package com.projecttango.examples.java.modelcorrespondence;
+package io.functionally.infovis;
 
 import android.opengl.Matrix;
-
-import org.rajawali3d.math.Matrix4;
-import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,12 +25,12 @@ import java.util.List;
  * Given data model.
  * The user is supposed to already have this.
  */
-public class HouseModel {
+public class InfoVisModel {
 
     // Some points in model frame that the user is supposed to know to make the correspondence.
     private List<float[]> mModelPoints;
 
-    public HouseModel() {
+    public InfoVisModel() {
         mModelPoints = new ArrayList<float[]>();
         // Populate the points in model frame to make the correspondence. In this case they are
         // the four corners.

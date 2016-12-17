@@ -17,4 +17,4 @@
  * A sample showing how to get the correspondence transform between two sets of points using Tango
  * and Rajawali.
  */
-package com.projecttango.examples.java.modelcorrespondence;
+package io.functionally.infovis;
