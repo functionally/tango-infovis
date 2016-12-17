@@ -56,7 +56,7 @@ import io.functionally.modelcorrespondence.R;
  * crosshair.
  */
 public class InfoVisRenderer extends Renderer {
-    private static final float SPHERE_RADIUS = 0.02f;
+    private static final float SPHERE_RADIUS = 0.01f;
     private static final String TAG = InfoVisRenderer.class.getSimpleName();
 
     private float[] textureCoords0 = new float[]{0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F};
@@ -175,13 +175,19 @@ public class InfoVisRenderer extends Renderer {
                     line.setMaterial(lineMaterial);
                     mHouseObject3D.addChild(line);
                 }
-            for (int i = 0; i < 250; ++i) {
-                Object3D box = new Cube(0.025f * (float) Math.random());
-                box.setMaterial(mSphereMaterial);
-                box.setColor(0xff2646ea);
-                box.setPosition(Math.random(), Math.random(), Math.random());
-                mHouseObject3D.addChild(box);
-            }
+            n = 17;
+            delta = 1f / n;
+            for (int ix = 0; ix <= n; ++ix)
+                for (int iy = 0; iy <= n; ++iy) {
+                    double x = Math.min(ix * delta                    * (1 + (Math.random() - 0.5) / 3), 1);
+                    double y = Math.min(iy * delta                    * (1 + (Math.random() - 0.5) / 3), 1);
+                    double z = Math.min(Math.sin(x * Math.PI / 2) * y * (1 + (Math.random() - 0.5) / 3), 1);
+                    Object3D box = new Cube(0.025f * (float) Math.random());
+                    box.setMaterial(mHouseMaterial);
+                    box.setColor(0xff2646ea);
+                    box.setPosition((float) x, (float) y, (float) z);
+                    mHouseObject3D.addChild(box);
+                }
             mHouseObject3D.setMaterial(mHouseMaterial);
             getCurrentScene().addChild(mHouseObject3D);
 
