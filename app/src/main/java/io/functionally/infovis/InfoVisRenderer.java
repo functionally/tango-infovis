@@ -36,12 +36,14 @@ import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.primitives.Cube;
+import org.rajawali3d.primitives.Line3D;
 import org.rajawali3d.primitives.ScreenQuad;
 import org.rajawali3d.primitives.Sphere;
 import org.rajawali3d.renderer.Renderer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -143,6 +145,36 @@ public class InfoVisRenderer extends Renderer {
         } else {
 
             mHouseObject3D = new Object3D();
+            Material lineMaterial = new Material();
+            int n = 1;
+            float delta = 1f / n;
+            for (int x = 0; x <= n; ++x)
+                for (int y = 0; y <= n; ++y) {
+                    Stack<Vector3> points = new Stack();
+                    points.push(new Vector3(x * delta, y * delta, 0));
+                    points.push(new Vector3(x * delta, y * delta, 1));
+                    Object3D line = new Line3D(points, 1f, x == 0 && y == 0 ? Color.RED : Color.WHITE);
+                    line.setMaterial(lineMaterial);
+                    mHouseObject3D.addChild(line);
+                }
+            for (int y = 0; y <= n; ++y)
+                for (int z = 0; z <= n; ++z) {
+                    Stack<Vector3> points = new Stack();
+                    points.push(new Vector3(0, y * delta, z * delta));
+                    points.push(new Vector3(1, y * delta, z * delta));
+                    Object3D line = new Line3D(points, 1f, y == 0 && z == 0 ? Color.RED : Color.WHITE);
+                    line.setMaterial(lineMaterial);
+                    mHouseObject3D.addChild(line);
+                }
+            for (int z = 0; z <= n; ++z)
+                for (int x = 0; x <= n; ++x) {
+                    Stack<Vector3> points = new Stack();
+                    points.push(new Vector3(x * delta, 0, z * delta));
+                    points.push(new Vector3(x * delta, 1, z * delta));
+                    Object3D line = new Line3D(points, 1f, z == 0 && x == 0 ? Color.RED : Color.WHITE);
+                    line.setMaterial(lineMaterial);
+                    mHouseObject3D.addChild(line);
+                }
             for (int x = 0; x <= 1; ++x)
                 for (int y = 0; y <= 1; ++y)
                     for (int z = 0; z <= 1; ++z) {
