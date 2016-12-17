@@ -96,8 +96,8 @@ public class InfoVisActivity extends Activity {
     private List<float[]> mDestPointList;
     // The given data model.
     private InfoVisModel mInfoVisModel;
-    // Transform of the house in OpenGl frame.
-    private float[] mOpenGlTHouse;
+    // Transform of the info in OpenGl frame.
+    private float[] mOpenGlTInfo;
     // A flag indicating whether the model was updated and must be re rendered in the next loop.
     private boolean mModelUpdated;
     // If the correspondence was not done yet, the model object is fixed to the camera in the top
@@ -355,13 +355,13 @@ public class InfoVisActivity extends Activity {
                                     if (transform.statusCode == TangoPoseData.POSE_VALID) {
                                         // Place it in the top left corner, and rotate and scale it
                                         // accordingly.
-                                        float[] rgbTHouse = calculateModelTransformFixedToCam
+                                        float[] rgbTInfo = calculateModelTransformFixedToCam
                                                 (mColorCameraToDisplayAndroidRotation);
                                         // Combine the two transforms.
-                                        float[] openGlTHouse = new float[16];
-                                        Matrix.multiplyMM(openGlTHouse, 0, transform.matrix,
-                                                0, rgbTHouse, 0);
-                                        mOpenGlTHouse = openGlTHouse;
+                                        float[] openGlTInfo = new float[16];
+                                        Matrix.multiplyMM(openGlTInfo, 0, transform.matrix,
+                                                0, rgbTInfo, 0);
+                                        mOpenGlTInfo = openGlTInfo;
                                         mModelUpdated = true;
                                     } else {
                                         Log.w(TAG, "Can't get camera transform at time: " +
@@ -376,7 +376,7 @@ public class InfoVisActivity extends Activity {
 
                         // If the model was updated then it must be re rendered.
                         if (mModelUpdated) {
-                            mRenderer.updateModelRendering(mInfoVisModel, mOpenGlTHouse,
+                            mRenderer.updateModelRendering(mInfoVisModel, mOpenGlTInfo,
                                     mDestPointList);
                             mModelUpdated = false;
                         }
@@ -533,7 +533,7 @@ public class InfoVisActivity extends Activity {
             mZRotationAnimator.cancel();
         }
         mInfoVisModel = new InfoVisModel();
-        mOpenGlTHouse = new float[16];
+        mOpenGlTInfo = new float[16];
         mDestPointList = new ArrayList<float[]>();
         mCorrespondenceDone = false;
         mModelUpdated = true;
@@ -598,7 +598,7 @@ public class InfoVisActivity extends Activity {
      */
     public void findCorrespondence() {
         // Get the correspondence source 3D points.
-        List<float[]> srcVectors = mInfoVisModel.getOpenGlModelPpoints(mOpenGlTHouse);
+        List<float[]> srcVectors = mInfoVisModel.getOpenGlModelPpoints(mOpenGlTInfo);
         double[][] src = new double[4][3];
         for (int i = 0; i < mInfoVisModel.getNumberOfPoints(); i++) {
             float[] v = srcVectors.get(i);
@@ -626,8 +626,8 @@ public class InfoVisActivity extends Activity {
      */
     public void transformModel(float[] newTransform) {
         float[] newOpenGlTModel = new float[16];
-        Matrix.multiplyMM(newOpenGlTModel, 0, newTransform, 0, mOpenGlTHouse, 0);
-        mOpenGlTHouse = newOpenGlTModel;
+        Matrix.multiplyMM(newOpenGlTModel, 0, newTransform, 0, mOpenGlTInfo, 0);
+        mOpenGlTInfo = newOpenGlTModel;
         mModelUpdated = true;
         mCorrespondenceDone = true;
     }
@@ -639,29 +639,29 @@ public class InfoVisActivity extends Activity {
     private float[] calculateModelTransformFixedToCam(int colorCameraToDisplayAndroidRotation) {
         // Translate to the upper left corner and ahead of the cam if the device is in landscape
         // mode or to the upper center if it is in portrait mode.
-        float[] rgbTHouse = new float[16];
-        Matrix.setIdentityM(rgbTHouse, 0);
+        float[] rgbTInfo = new float[16];
+        Matrix.setIdentityM(rgbTInfo, 0);
         switch (colorCameraToDisplayAndroidRotation) {
             case Surface.ROTATION_90:
             case Surface.ROTATION_270:
-                Matrix.translateM(rgbTHouse, 0, 0f, 1.2f, -4);
+                Matrix.translateM(rgbTInfo, 0, 0f, 1.2f, -4);
                 break;
             case Surface.ROTATION_0:
             case Surface.ROTATION_180:
             default:
-                Matrix.translateM(rgbTHouse, 0, -1.5f, 0.3f, -4);
+                Matrix.translateM(rgbTInfo, 0, -1.5f, 0.3f, -4);
         }
 
-        // Rotate it 180 degrees around the Z axis to show the front of the house as default
+        // Rotate it 180 degrees around the Z axis to show the front of the info as default
         // orientation.
-        Matrix.rotateM(rgbTHouse, 0, 180, 0, 0, 1);
+        Matrix.rotateM(rgbTInfo, 0, 180, 0, 0, 1);
         // Rotate it around the X axis so it looks better as seen from above.
-        Matrix.rotateM(rgbTHouse, 0, 70, 1, 0, 0);
+        Matrix.rotateM(rgbTInfo, 0, 70, 1, 0, 0);
         // Rotate it around the Z axis to show the next correspondence point to be added.
-        Matrix.rotateM(rgbTHouse, 0, -mModelZRotation, 0, 0, 1);
+        Matrix.rotateM(rgbTInfo, 0, -mModelZRotation, 0, 0, 1);
         // Scale it to a proper size.
-        Matrix.scaleM(rgbTHouse, 0, 0.03f, 0.03f, 0.03f);
-        return rgbTHouse;
+        Matrix.scaleM(rgbTInfo, 0, 0.03f, 0.03f, 0.03f);
+        return rgbTInfo;
     }
 
     /**

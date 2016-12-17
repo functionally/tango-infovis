@@ -43,11 +43,11 @@ public class InfoVisModel {
     /**
      * Get the model points in OpenGl frame.
      */
-    public List<float[]> getOpenGlModelPpoints(float[] openGlTHouse) {
+    public List<float[]> getOpenGlModelPpoints(float[] openGlTInfo) {
         List<float[]> openGlPpoints = new ArrayList<float[]>();
         for (float[] modelPoint : mModelPoints) {
             float[] openGlPoint = new float[4];
-            Matrix.multiplyMV(openGlPoint, 0, openGlTHouse, 0, modelPoint, 0);
+            Matrix.multiplyMV(openGlPoint, 0, openGlTInfo, 0, modelPoint, 0);
             openGlPpoints.add(openGlPoint);
         }
         return openGlPpoints;

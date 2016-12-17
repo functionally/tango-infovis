@@ -25,8 +25,6 @@ import android.view.Surface;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.lights.DirectionalLight;
-import org.rajawali3d.loader.LoaderSTL;
-import org.rajawali3d.loader.ParsingException;
 import org.rajawali3d.materials.Material;
 import org.rajawali3d.materials.methods.DiffuseMethod;
 import org.rajawali3d.materials.methods.SpecularMethod;
@@ -47,11 +45,9 @@ import java.util.Stack;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import io.functionally.modelcorrespondence.R;
-
 /**
  * Simple example augmented reality renderer which displays spheres fixed in place for every
- * point measurement and a 3D model of a house in the position given by the found correspondence.
+ * point measurement and a 3D model of a info in the position given by the found correspondence.
  * Whenever the user clicks on '+' button, a sphere is placed in the aimed position with the
  * crosshair.
  */
@@ -68,11 +64,11 @@ public class InfoVisRenderer extends Renderer {
     private ATexture mTangoCameraTexture;
     private boolean mSceneCameraConfigured;
 
-    private Object3D mHouseObject3D;
+    private Object3D mInfoObject3D;
     private Object3D mNextPointObject3D;
     private List<Object3D> mDestPointsObjectList = new ArrayList<Object3D>();
     private Material mSphereMaterial;
-    private Material mHouseMaterial;
+    private Material mInfoMaterial;
 
     private ScreenQuad mBackgroundQuad;
 
@@ -121,77 +117,58 @@ public class InfoVisRenderer extends Renderer {
         mSphereMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
         mSphereMaterial.setSpecularMethod(new SpecularMethod.Phong());
 
-        mHouseMaterial = new Material();
-        mHouseMaterial.enableLighting(true);
-        mHouseMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
-        mHouseMaterial.setSpecularMethod(new SpecularMethod.Phong());
-        mHouseMaterial.setColor(0xffcc6644);
-        mHouseMaterial.setColorInfluence(0.5f);
+        mInfoMaterial = new Material();
+        mInfoMaterial.enableLighting(true);
+        mInfoMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
+        mInfoMaterial.setSpecularMethod(new SpecularMethod.Phong());
 
-        if (false) {
-
-            // Load STL model.
-            LoaderSTL parser = new LoaderSTL(getContext().getResources(), mTextureManager,
-                    R.raw.farmhouse);
-            try {
-                parser.parse();
-                mHouseObject3D = parser.getParsedObject();
-                mHouseObject3D.setMaterial(mHouseMaterial);
-                getCurrentScene().addChild(mHouseObject3D);
-            } catch (ParsingException e) {
-                Log.d(TAG, "Model load failed");
+        mInfoObject3D = new Object3D();
+        Material lineMaterial = new Material();
+        int n = 1;
+        float delta = 1f / n;
+        for (int x = 0; x <= n; ++x)
+            for (int y = 0; y <= n; ++y) {
+                Stack<Vector3> points = new Stack();
+                points.push(new Vector3(x * delta, y * delta, 0));
+                points.push(new Vector3(x * delta, y * delta, 1));
+                Object3D line = new Line3D(points, 1f, x == 0 && y == 0 ? Color.RED : Color.WHITE);
+                line.setMaterial(lineMaterial);
+                mInfoObject3D.addChild(line);
             }
+        for (int y = 0; y <= n; ++y)
+            for (int z = 0; z <= n; ++z) {
+                Stack<Vector3> points = new Stack();
+                points.push(new Vector3(0, y * delta, z * delta));
+                points.push(new Vector3(1, y * delta, z * delta));
+                Object3D line = new Line3D(points, 1f, y == 0 && z == 0 ? Color.RED : Color.WHITE);
+                line.setMaterial(lineMaterial);
+                mInfoObject3D.addChild(line);
+            }
+        for (int z = 0; z <= n; ++z)
+            for (int x = 0; x <= n; ++x) {
+                Stack<Vector3> points = new Stack();
+                points.push(new Vector3(x * delta, 0, z * delta));
+                points.push(new Vector3(x * delta, 1, z * delta));
+                Object3D line = new Line3D(points, 1f, z == 0 && x == 0 ? Color.RED : Color.WHITE);
+                line.setMaterial(lineMaterial);
+                mInfoObject3D.addChild(line);
+            }
+        n = 18;
+        delta = 1f / n;
+        for (int ix = 0; ix <= n; ++ix)
+            for (int iy = 0; iy <= n; ++iy) {
+                double x = Math.min(ix * delta                    * (1 + (Math.random() - 0.5) / 3), 1);
+                double y = Math.min(iy * delta                    * (1 + (Math.random() - 0.5) / 3), 1);
+                double z = Math.min(Math.sin(x * Math.PI / 2) * y * (1 + (Math.random() - 0.5) / 3), 1);
+                Object3D box = new Cube(0.025f * (float) Math.random());
+                box.setMaterial(mInfoMaterial);
+                box.setColor(0xff000000 | (int) (0x00ffffff * Math.random()));
+                box.setPosition((float) x, (float) y, (float) z);
+                mInfoObject3D.addChild(box);
+                }
+        mInfoObject3D.setMaterial(mInfoMaterial);
+        getCurrentScene().addChild(mInfoObject3D);
 
-        } else {
-
-            mHouseObject3D = new Object3D();
-            Material lineMaterial = new Material();
-            int n = 1;
-            float delta = 1f / n;
-            for (int x = 0; x <= n; ++x)
-                for (int y = 0; y <= n; ++y) {
-                    Stack<Vector3> points = new Stack();
-                    points.push(new Vector3(x * delta, y * delta, 0));
-                    points.push(new Vector3(x * delta, y * delta, 1));
-                    Object3D line = new Line3D(points, 1f, x == 0 && y == 0 ? Color.RED : Color.WHITE);
-                    line.setMaterial(lineMaterial);
-                    mHouseObject3D.addChild(line);
-                }
-            for (int y = 0; y <= n; ++y)
-                for (int z = 0; z <= n; ++z) {
-                    Stack<Vector3> points = new Stack();
-                    points.push(new Vector3(0, y * delta, z * delta));
-                    points.push(new Vector3(1, y * delta, z * delta));
-                    Object3D line = new Line3D(points, 1f, y == 0 && z == 0 ? Color.RED : Color.WHITE);
-                    line.setMaterial(lineMaterial);
-                    mHouseObject3D.addChild(line);
-                }
-            for (int z = 0; z <= n; ++z)
-                for (int x = 0; x <= n; ++x) {
-                    Stack<Vector3> points = new Stack();
-                    points.push(new Vector3(x * delta, 0, z * delta));
-                    points.push(new Vector3(x * delta, 1, z * delta));
-                    Object3D line = new Line3D(points, 1f, z == 0 && x == 0 ? Color.RED : Color.WHITE);
-                    line.setMaterial(lineMaterial);
-                    mHouseObject3D.addChild(line);
-                }
-            n = 17;
-            delta = 1f / n;
-            for (int ix = 0; ix <= n; ++ix)
-                for (int iy = 0; iy <= n; ++iy) {
-                    double x = Math.min(ix * delta                    * (1 + (Math.random() - 0.5) / 3), 1);
-                    double y = Math.min(iy * delta                    * (1 + (Math.random() - 0.5) / 3), 1);
-                    double z = Math.min(Math.sin(x * Math.PI / 2) * y * (1 + (Math.random() - 0.5) / 3), 1);
-                    Object3D box = new Cube(0.025f * (float) Math.random());
-                    box.setMaterial(mHouseMaterial);
-                    box.setColor(0xff2646ea);
-                    box.setPosition((float) x, (float) y, (float) z);
-                    mHouseObject3D.addChild(box);
-                }
-            mHouseObject3D.setMaterial(mHouseMaterial);
-            getCurrentScene().addChild(mHouseObject3D);
-
-        }
     }
 
     /**
@@ -258,7 +235,7 @@ public class InfoVisRenderer extends Renderer {
      * correspondence destination points as red spheres. Render the 3d model in the position and
      * orientation given by the found correspondence transform.
      */
-    public void updateModelRendering(InfoVisModel infoVisModel, float[] openGlTHouse,
+    public void updateModelRendering(InfoVisModel infoVisModel, float[] openGlTInfo,
                                      List<float[]> destPoints) {
         if (destPoints.size() > mDestPointsObjectList.size()) {
             // If new destination points were measured, then add them as points as red spheres.
@@ -278,25 +255,25 @@ public class InfoVisRenderer extends Renderer {
 
         // Move the position of the next source point to be added.
         int nextPointNumber = destPoints.size();
-        List<float[]> houseModelPoints = infoVisModel.getOpenGlModelPpoints(openGlTHouse);
-        if (nextPointNumber < houseModelPoints.size()) {
+        List<float[]> infoModelPoints = infoVisModel.getOpenGlModelPpoints(openGlTInfo);
+        if (nextPointNumber < infoModelPoints.size()) {
             if (mNextPointObject3D == null) {
                 mNextPointObject3D = makePoint(new float[]{0, 0, 0}, Color.GREEN);
                 getCurrentScene().addChild(mNextPointObject3D);
             }
-            float[] position = houseModelPoints.get(nextPointNumber);
+            float[] position = infoModelPoints.get(nextPointNumber);
             mNextPointObject3D.setPosition(position[0], position[1], position[2]);
         } else {
             getCurrentScene().removeChild(mNextPointObject3D);
             mNextPointObject3D = null;
         }
 
-        // Place the house object in the position and orientation given by the correspondence
+        // Place the info object in the position and orientation given by the correspondence
         // transform.
-        if (mHouseObject3D != null) {
-            Matrix4 transform = new Matrix4(openGlTHouse);
+        if (mInfoObject3D != null) {
+            Matrix4 transform = new Matrix4(openGlTInfo);
             double scale = transform.getScaling().x;
-            mHouseObject3D.setScale(scale);
+            mInfoObject3D.setScale(scale);
             // Multiply by the inverse of the scale so the transform is only rotation and
             // translation.
             Vector3 translation = transform.getTranslation();
@@ -304,8 +281,8 @@ public class InfoVisRenderer extends Renderer {
             transform.multiply(invScale);
             Quaternion orientation = new Quaternion().fromMatrix(transform);
             orientation.normalize();
-            mHouseObject3D.setPosition(translation);
-            mHouseObject3D.setOrientation(orientation);
+            mInfoObject3D.setPosition(translation);
+            mInfoObject3D.setOrientation(orientation);
         }
     }
 
