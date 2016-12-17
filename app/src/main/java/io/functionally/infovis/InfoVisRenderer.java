@@ -35,6 +35,7 @@ import org.rajawali3d.materials.textures.StreamingTexture;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.math.vector.Vector3;
+import org.rajawali3d.primitives.Cube;
 import org.rajawali3d.primitives.ScreenQuad;
 import org.rajawali3d.primitives.Sphere;
 import org.rajawali3d.renderer.Renderer;
@@ -103,13 +104,13 @@ public class InfoVisRenderer extends Renderer {
         DirectionalLight light = new DirectionalLight(1, 0.2, -1);
         light.setColor(1, 1, 1);
         light.setPower(0.8f);
-        light.setPosition(3, 2, 4);
+        light.setPosition(0.3, 0.2, 0.4);
         getCurrentScene().addLight(light);
 
         DirectionalLight light2 = new DirectionalLight(-1, 0.2, -1);
         light.setColor(1, 4, 4);
         light.setPower(0.8f);
-        light.setPosition(3, 3, 3);
+        light.setPosition(0.3, 0.3, 0.3);
         getCurrentScene().addLight(light2);
 
         // Set-up a materials.
@@ -125,16 +126,35 @@ public class InfoVisRenderer extends Renderer {
         mHouseMaterial.setColor(0xffcc6644);
         mHouseMaterial.setColorInfluence(0.5f);
 
-        // Load STL model.
-        LoaderSTL parser = new LoaderSTL(getContext().getResources(), mTextureManager,
-                R.raw.farmhouse);
-        try {
-            parser.parse();
-            mHouseObject3D = parser.getParsedObject();
+        if (false) {
+
+            // Load STL model.
+            LoaderSTL parser = new LoaderSTL(getContext().getResources(), mTextureManager,
+                    R.raw.farmhouse);
+            try {
+                parser.parse();
+                mHouseObject3D = parser.getParsedObject();
+                mHouseObject3D.setMaterial(mHouseMaterial);
+                getCurrentScene().addChild(mHouseObject3D);
+            } catch (ParsingException e) {
+                Log.d(TAG, "Model load failed");
+            }
+
+        } else {
+
+            mHouseObject3D = new Object3D();
+            for (int x = 0; x <= 1; ++x)
+                for (int y = 0; y <= 1; ++y)
+                    for (int z = 0; z <= 1; ++z) {
+                        Object3D box = new Cube(0.03f);
+                        box.setMaterial(mSphereMaterial);
+                        box.setColor(0xff2646ea);
+                        box.setPosition(x, y, z);
+                        mHouseObject3D.addChild(box);
+                    }
             mHouseObject3D.setMaterial(mHouseMaterial);
             getCurrentScene().addChild(mHouseObject3D);
-        } catch (ParsingException e) {
-            Log.d(TAG, "Model load failed");
+
         }
     }
 

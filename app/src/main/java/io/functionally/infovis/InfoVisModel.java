@@ -34,10 +34,10 @@ public class InfoVisModel {
         mModelPoints = new ArrayList<float[]>();
         // Populate the points in model frame to make the correspondence. In this case they are
         // the four corners.
-        mModelPoints.add(new float[]{-9.52f, 19.46f, 0.0837f, 1});
-        mModelPoints.add(new float[]{-9.52f, -27.44f, 0.0837f, 1});
-        mModelPoints.add(new float[]{9.57f, -27.44f, 0.0837f, 1});
-        mModelPoints.add(new float[]{9.57f, 19.46f, 0.0837f, 1});
+        mModelPoints.add(new float[]{0f, 1f, 0.01f, 1});
+        mModelPoints.add(new float[]{0f, 0f, 0.01f, 1});
+        mModelPoints.add(new float[]{1f, 0f, 0.01f, 1});
+        mModelPoints.add(new float[]{1f, 1f, 0.01f, 1});
     }
 
     /**
