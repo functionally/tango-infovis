@@ -175,15 +175,13 @@ public class InfoVisRenderer extends Renderer {
                     line.setMaterial(lineMaterial);
                     mHouseObject3D.addChild(line);
                 }
-            for (int x = 0; x <= 1; ++x)
-                for (int y = 0; y <= 1; ++y)
-                    for (int z = 0; z <= 1; ++z) {
-                        Object3D box = new Cube(0.03f);
-                        box.setMaterial(mSphereMaterial);
-                        box.setColor(0xff2646ea);
-                        box.setPosition(x, y, z);
-                        mHouseObject3D.addChild(box);
-                    }
+            for (int i = 0; i < 250; ++i) {
+                Object3D box = new Cube(0.025f * (float) Math.random());
+                box.setMaterial(mSphereMaterial);
+                box.setColor(0xff2646ea);
+                box.setPosition(Math.random(), Math.random(), Math.random());
+                mHouseObject3D.addChild(box);
+            }
             mHouseObject3D.setMaterial(mHouseMaterial);
             getCurrentScene().addChild(mHouseObject3D);
 
